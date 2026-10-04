@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Italingo — Тренажер меню пиццы</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Nunito', 'Inter', -apple-system, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f8fafc;
+    }
+
+    /* 3D Duolingo Button Styles */
+    .btn-duo-green {
+      background-color: #58cc02;
+      box-shadow: 0 4px 0 #46a302;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-green:hover:not(:disabled) {
+      background-color: #61e002;
+    }
+    .btn-duo-green:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #46a302;
+    }
+    .btn-duo-green:disabled {
+      background-color: #e2e8f0;
+      box-shadow: 0 4px 0 #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .btn-duo-blue {
+      background-color: #1cb0f6;
+      box-shadow: 0 4px 0 #1899d6;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-blue:hover:not(:disabled) {
+      background-color: #2ec5ff;
+    }
+    .btn-duo-blue:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #1899d6;
+    }
+
+    .btn-duo-red {
+      background-color: #ff4b4b;
+      box-shadow: 0 4px 0 #ea2b2b;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-red:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #ea2b2b;
+    }
+
+    .btn-duo-yellow {
+      background-color: #f5c400;
+      box-shadow: 0 4px 0 #d97706;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-yellow:hover:not(:disabled) {
+      background-color: #ffd000;
+    }
+    .btn-duo-yellow:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #d97706;
+    }
+
+    .btn-duo-orange {
+      background-color: #f97316;
+      box-shadow: 0 4px 0 #c2410c;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-orange:hover:not(:disabled) {
+      background-color: #fb923c;
+    }
+    .btn-duo-orange:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #c2410c;
+    }
+
+    .btn-duo-purple {
+      background-color: #a855f7;
+      box-shadow: 0 4px 0 #6d28d9;
+      color: #ffffff;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-purple:hover:not(:disabled) {
+      background-color: #c084fc;
+    }
+    .btn-duo-purple:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #6d28d9;
+    }
+
+    .btn-duo-white {
+      background-color: #ffffff;
+      box-shadow: 0 4px 0 #e2e8f0;
+      border: 2px solid #e2e8f0;
+      color: #334155;
+      transition: all 0.08s ease;
+    }
+    .btn-duo-white:hover {
+      background-color: #f8fafc;
+    }
+    .btn-duo-white:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #cbd5e1;
+    }
+
+    /* Ingredient Card */
+    .ing-card {
+      background-color: #ffffff;
+      box-shadow: 0 3px 0 #e2e8f0;
+      border: 2px solid #e2e8f0;
+      color: #334155;
+      transition: all 0.1s ease;
+    }
+    .ing-card:hover:not(:disabled) {
+      border-color: #cbd5e1;
+      background-color: #f8fafc;
+    }
+    .ing-card:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #e2e8f0;
+    }
+    .ing-card.picked {
+      opacity: 0.35;
+      pointer-events: none;
+      filter: grayscale(0.7);
+      transform: scale(0.97);
+      box-shadow: none;
+      border-style: dashed;
+    }
+
+    /* Recipe Slots */
+    .slot-known {
+      background-color: #f0fdf4;
+      border: 2px solid #bbf7d0;
+      color: #166534;
+    }
+    .slot-blank {
+      background-color: #fefce8;
+      border: 2px dashed #facc15;
+      color: #854d0e;
+    }
+    .slot-filled {
+      background-color: #eff6ff;
+      border: 2px solid #93c5fd;
+      color: #1e40af;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #bfdbfe;
+    }
+    .slot-filled:hover {
+      border-color: #60a5fa;
+      background-color: #dbeafe;
+    }
+
+    /* Selector Pill */
+    .pill-opt {
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 3px 0 #e2e8f0;
+      background: white;
+      color: #475569;
+      font-weight: 800;
+      transition: all 0.1s ease;
+    }
+    .pill-opt.active {
+      background-color: #15803d;
+      border-color: #166534;
+      box-shadow: 0 3px 0 #14532d;
+      color: white;
+    }
+
+    .hero-banner {
+      background-image:
+        linear-gradient(135deg, rgba(20, 83, 45, 0.88) 0%, rgba(22, 101, 52, 0.82) 50%, rgba(21, 128, 61, 0.85) 100%),
+        url('https://static.tildacdn.com/tild6430-6432-4734-b563-636339653135/image.png');
+      background-size: cover;
+      background-position: center;
+    }
+
+    @keyframes duoShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-error {
+      animation: duoShake 0.4s ease-in-out;
+    }
+
+    @keyframes popBounce {
+      0% { transform: scale(0.96); opacity: 0; }
+      60% { transform: scale(1.02); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in {
+      animation: popBounce 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <script>
+    const SoundFx = {
+      ctx: null,
+      muted: false,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+      },
+      playPop() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(680, this.ctx.currentTime + 0.06);
+          gain.gain.setValueAtTime(0.16, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.06);
+        } catch (e) {}
+      },
+      playRemove() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(250, this.ctx.currentTime + 0.06);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.06);
+        } catch (e) {}
+      },
+      playCorrect() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          osc.frequency.setValueAtTime(1046.50, now + 0.24);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.2, now + 0.28);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } catch (e) {}
+      },
+      playWrong() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(261.63, now); // C4
+          osc.frequency.linearRampToValueAtTime(196.00, now + 0.2); // G3
+          gain.gain.setValueAtTime(0.24, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } catch (e) {}
+      },
+      playFanfare() {
+        if (this.muted) return;
+        try {
+          this.init();
+          const notes = [523.25, 659.25, 783.99, 1046.50, 880, 1046.50, 1318.5];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const start = this.ctx.currentTime + idx * 0.09;
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.18, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.22);
+          });
+        } catch (e) {}
+      }
+    };
+  </script>
+
+  <script>
+    const PIZZA_DATABASE = [
+      {
+        name: "Пицца Пепперони и соусом BBQ",
+        emoji: "🍕",
+        ingredients: ["Соус пелати", "Сыр моцарелла", "Пепперони", "Соус bbq", "Прованские травы"]
+      },
+      {
+        name: "Пицца Прошутто",
+        emoji: "🍕",
+        ingredients: ["Соус пелати", "Сыр моцарелла", "Свежие томаты", "Рукола", "Прошутто", "Сыр пармезан", "Крем-бальзамик"]
+      },
+      {
+        name: "Пицца Четыре сыра",
+        emoji: "🍕",
+        ingredients: ["Сливочный соус", "Творожный сыр", "Моцарелла", "Пармезан", "Горгонзола"]
+      },
+      {
+        name: "Пицца с пастрами из говядины, квашеной капустой и халапеньо",
+        emoji: "🍕",
+        ingredients: ["Пастрами говядина", "Квашеная капуста", "Халапеньо", "Страчателла", "Сливочный соус", "Азиатский соус"]
+      },
+      {
+        name: "Пицца с угрем",
+        emoji: "🍕",
+        ingredients: ["Угорь", "Страчателла", "Бонито"]
+      },
+      {
+        name: "Пицца с ветчиной и сыром",
+        emoji: "🍕",
+        ingredients: ["Соус пелати", "Ветчина", "Сыр моцарелла"]
+      },
+      {
+        name: "Пицца Супер BBQ",
+        emoji: "🍕",
+        ingredients: ["Соус пелати", "Моцарелла", "Бекон", "Пепперони", "Пастрами из говядины", "Маринованный лук", "Страчателла", "Азиатский соус", "Петрушка"]
+      },
+      {
+        name: "Пицца с цыпленком и сыром",
+        emoji: "🍕",
+        ingredients: ["Сливочный соус", "Цыпленок", "Сыр моцарелла"]
+      },
+      {
+        name: "Пицца с пастрами из цыпленка, беконом и моцареллой",
+        emoji: "🍕",
+        ingredients: ["Пастрами из цыпленка", "Бекон", "Хрустящий маринованный огурец", "Лук фри", "Маринованный лук", "Шпинат", "Фирменный соус"]
+      },
+      {
+        name: "Пицца с грушей, горгонзолой и соусом юдзу",
+        emoji: "🍕",
+        ingredients: ["Сливочный соус", "Моцарелла", "Груша", "Горгонзола", "Рукола", "Мед", "Кедровые орехи"]
+      },
+      {
+        name: "Пицца с морепродуктами",
+        emoji: "🍕",
+        ingredients: ["Чесночный соус", "Мидии", "Креветки тигровые", "Икра капеллана", "Страчателла", "Зеленое масло", "Азиатский соус", "Сыр моцарелла"]
+      },
+      {
+        name: "Пицца с грибами, страчателлой и трюфелем",
+        emoji: "🍕",
+        ingredients: ["Белые грибы", "Шампиньоны", "Сливочный соус", "Моцарелла", "Страчателла", "Трюфельная паста"]
+      },
+      {
+        name: "Пицца Сливочная Пепперони",
+        emoji: "🍕",
+        ingredients: ["Сливочный соус", "Сыр моцарелла", "Пепперони", "Красный маринованный лук", "Петрушка"]
+      },
+      {
+        name: "Пицца Карбонара",
+        emoji: "🍕",
+        ingredients: ["Моцарелла", "Чесночный соус", "Бекон", "Пармезан", "Лук фри", "Хрустящий бекон"]
+      },
+      {
+        name: "Пицца Четыре Сезона 2.0",
+        emoji: "🍕",
+        ingredients: ["2 кусочка цыпленок/песто/страчателла", "2 кусочка сливочная пепперони", "2 кусочка с копчеными колбасками", "2 кусочка котто"]
+      },
+      {
+        name: "Пицца четыре сезона",
+        emoji: "🍕",
+        ingredients: ["2 кусочка — цыпленок / бекон / моцарелла", "2 кусочка — пастрами из говядины / квашеная капуста / халапеньо", "2 кусочка — грибы / страчателла / трюфель", "2 кусочка — груша / горгонзола / юдзу"]
+      },
+      {
+        name: "Пицца 2 СЕЗОНА 3.0",
+        emoji: "🍕",
+        ingredients: ["4 кусочка ветчина/сыр", "4 кусочка пепперони/песто/страчателла"]
+      },
+      {
+        name: "Пицца 2 СЕЗОНА 2.0",
+        emoji: "🍕",
+        ingredients: ["4 кусочка морепродукты", "4 кусочка куриный рулет/сливочный карри"]
+      },
+      {
+        name: "Пицца Маргарита",
+        emoji: "🍕",
+        ingredients: ["Соус пелати", "Сыр моцарелла", "Орегано"]
+      },
+      {
+        name: "Пицца страчателла/анчоусы",
+        emoji: "🍕",
+        ingredients: ["Пелати", "Страчателла", "Песто", "Анчоусы", "Лук сибулет"]
+      },
+      {
+        name: "Пицца котто/артишоки/трюфельное масло",
+        emoji: "🍕",
+        ingredients: ["Чесночный соус", "Моцарелла", "Котто", "Артишоки", "Трюфельное масло", "Каперсы", "Молотый перец"]
+      },
+      {
+        name: "Пицца креветки/цукини/песто",
+        emoji: "🍕",
+        ingredients: ["Пелати", "Моцарелла", "Цукини", "Креветки", "Песто", "Страчателла"]
+      },
+      {
+        name: "Пицца креветки/блю чиз",
+        emoji: "🍕",
+        ingredients: ["Соус блю чиз", "Моцарелла", "Горгонзола", "Креветки", "Сладкий бекон", "Мед"]
+      }
+    ];
+
+    const ALL_INGREDIENTS = Array.from(new Set(
+      PIZZA_DATABASE.flatMap(p => p.ingredients)
+    ));
+
+    const LEVELS = [
+      {
+        level: 1,
+        title: "Уровень 1",
+        subtitle: "1 скрытый ингредиент",
+        desc: "Легкий старт: в каждой из 23 пицц скрыт 1 ингредиент",
+        blanks: 1,
+        badgeBg: "linear-gradient(135deg, #10b981, #16a34a)",
+        btnColor: "btn-duo-green"
+      },
+      {
+        level: 2,
+        title: "Уровень 2",
+        subtitle: "2 скрытых ингредиента",
+        desc: "Закрепление: в каждой пицце скрыто 2 ингредиента",
+        blanks: 2,
+        badgeBg: "linear-gradient(135deg, #0ea5e9, #2563eb)",
+        btnColor: "btn-duo-blue"
+      },
+      {
+        level: 3,
+        title: "Уровень 3",
+        subtitle: "3 скрытых ингредиента",
+        desc: "Средний уровень: восстанови по 3 пропуска",
+        blanks: 3,
+        badgeBg: "linear-gradient(135deg, #f5c400, #d97706)",
+        btnColor: "btn-duo-yellow"
+      },
+      {
+        level: 4,
+        title: "Уровень 4",
+        subtitle: "4 скрытых ингредиента",
+        desc: "Продвинутый уровень: скрыто до 4 ингредиентов",
+        blanks: 4,
+        badgeBg: "linear-gradient(135deg, #fb923c, #ea580c)",
+        btnColor: "btn-duo-orange"
+      },
+      {
+        level: 5,
+        title: "Уровень 5",
+        subtitle: "5 скрытых ингредиентов",
+        desc: "Высокая сложность: скрыто до 5 ключевых ингредиентов",
+        blanks: 5,
+        badgeBg: "linear-gradient(135deg, #a855f7, #7c3aed)",
+        btnColor: "btn-duo-purple"
+      },
+      {
+        level: 6,
+        title: "Уровень 6",
+        subtitle: "Слепая сборка (ВСЕ скрыты)",
+        desc: "Абсолютное знание: все ингредиенты скрыты с нуля!",
+        blanks: 99,
+        badgeBg: "linear-gradient(135deg, #e11d48, #b91c1c)",
+        btnColor: "btn-duo-red"
+      }
+    ];
+  </script>
+
+  <header class="sticky top-0 z-40 bg-white border-b-2 border-slate-200 px-4 py-2.5 shadow-xs">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="App.goToLobby()">
+        <span class="text-3xl hover:scale-110 transition-transform">🍕</span>
+        <div class="leading-tight">
+          <span class="font-extrabold text-2xl tracking-tight text-emerald-700 block">Italingo</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <button id="btn-sound-toggle" onclick="App.toggleSound()" class="btn-duo-white font-extrabold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5" title="Включить / выключить звук">
+          <span id="sound-icon">🔊</span>
+          <span class="hidden sm:inline" id="sound-text">Звук</span>
+        </button>
+
+        <button onclick="App.openHandbook()" class="btn-duo-white font-black text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+          <span>📖</span>
+          <span>Меню (23)</span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col justify-start">
+    
+    <!-- VIEW 1: Level Selector (Lobby) -->
+    <section id="view-lobby" class="w-full flex flex-col items-center pb-16">
+      
+      <!-- Hero Banner -->
+      <div class="hero-banner w-full rounded-3xl p-6 sm:p-8 text-white shadow-lg mb-6 relative overflow-hidden border-2 border-emerald-800">
+        <div class="relative z-10 max-w-xl">
+          <h1 class="text-2xl sm:text-4xl font-black mb-2 leading-tight drop-shadow-sm">
+            Выучи все меню от А до Я
+          </h1>
+          <p class="text-emerald-100 text-sm sm:text-base font-semibold mb-6 leading-relaxed drop-shadow-xs">
+            Интерактивный тренажер рецептуры всех 23 пицц. Прокачай память от одного пропуска до слепой сборки каждого блюда!
+          </p>
+          <button onclick="App.startFirstIncompleteLevel()" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-black px-6 py-3.5 rounded-2xl text-sm sm:text-base shadow-md transition transform active:scale-95 flex items-center gap-2">
+            <span>Начать тренировку</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Distractors Setting Bar -->
+      <div class="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 mb-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-left w-full sm:w-auto">
+          <div class="text-xs uppercase font-black text-slate-400">Сложность вариантов</div>
+          <div class="text-sm font-extrabold text-slate-700">Количество неверных ингредиентов (ловушек):</div>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end" id="distractor-pills">
+          <button onclick="App.setDistractorCount(5)" id="pill-5" class="pill-opt px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">5</button>
+          <button onclick="App.setDistractorCount(10)" id="pill-10" class="pill-opt px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">10</button>
+          <button onclick="App.setDistractorCount(15)" id="pill-15" class="pill-opt px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">15</button>
+          <button onclick="App.setDistractorCount(20)" id="pill-20" class="pill-opt px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">20</button>
+        </div>
+      </div>
+
+      <!-- Level Cards Grid -->
+      <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4" id="levels-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: In-Game Pizza Quiz Screen -->
+    <section id="view-game" class="hidden w-full max-w-2xl mx-auto flex flex-col flex-1 pb-32">
+      
+      <div class="w-full flex items-center justify-between gap-3 pt-1 pb-4">
+        <button onclick="App.confirmExit()" class="text-slate-400 hover:text-slate-600 font-black text-2xl p-1 rounded-xl">
+          ✕
+        </button>
+
+        <div class="flex-1 flex flex-col gap-1">
+          <div class="flex justify-between items-center text-xs font-black text-slate-500 px-1">
+            <span id="game-level-badge" class="uppercase text-emerald-700 font-extrabold tracking-wide">Уровень 1</span>
+            <span id="game-counter" class="text-slate-600 font-black">1 / 23</span>
+          </div>
+          <div class="w-full bg-slate-200 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-300">
+            <div id="game-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300 ease-out" style="width: 5%;"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 text-slate-600 font-black text-xs bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200">
+          <span>🍕</span>
+          <span>23 в сете</span>
+        </div>
+      </div>
+
+      <!-- Pizza Card Section -->
+      <div class="w-full bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm mb-4 pop-in" id="pizza-card-container">
+        
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center text-3xl shrink-0 shadow-xs" id="pizza-emoji">
+            🍕
+          </div>
+          <div>
+            <span class="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 inline-block mb-1">
+              Рецепт пиццы
+            </span>
+            <h2 id="pizza-title" class="text-xl sm:text-2xl font-black text-slate-800 leading-snug">
+              Пицца
+            </h2>
+          </div>
+        </div>
+
+        <div class="text-xs uppercase font-extrabold text-slate-400 mb-2">
+          <span>Состав пиццы:</span>
+        </div>
+
+        <div id="recipe-slots-container" class="flex flex-wrap gap-2">
+          <!-- Injected via JS -->
+        </div>
+
+      </div>
+
+      <!-- Ingredients Pool -->
+      <div class="w-full flex flex-col flex-1">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <span class="text-xs font-black uppercase text-slate-400" id="pool-title-label">Варианты ингредиентов:</span>
+          <span class="text-xs font-bold text-slate-500" id="remaining-blanks-text">Нужно заполнить: 1</span>
+        </div>
+
+        <div id="ingredient-pool" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <!-- dynamic buttons -->
+        </div>
+      </div>
+
+      <!-- Duolingo Bottom Action Bar -->
+      <div id="game-footer" class="fixed bottom-0 left-0 right-0 border-t-2 border-slate-200 bg-white p-4 z-40 transition-colors duration-200">
+        <div class="max-w-2xl mx-auto flex items-center justify-between gap-4">
+          
+          <div id="feedback-panel" class="hidden flex-1 flex items-center gap-3">
+            <div id="feedback-icon" class="text-3xl"></div>
+            <div>
+              <h4 id="feedback-title" class="font-extrabold text-lg leading-tight">Отлично!</h4>
+              <p id="feedback-subtitle" class="text-xs sm:text-sm font-semibold opacity-90"></p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button id="btn-reset-selection" onclick="App.resetCurrentSlots()" class="hidden btn-duo-white font-bold text-sm px-4 py-3.5 rounded-2xl">
+              Сброс
+            </button>
+            <button id="btn-check-action" onclick="App.handleCheckOrNext()" class="btn-duo-green w-full sm:w-auto sm:min-w-[200px] font-black text-base py-3.5 px-6 rounded-2xl" disabled>
+              ПРОВЕРИТЬ
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 3: Level Complete Congratulations Screen -->
+    <section id="view-success" class="hidden w-full max-w-md mx-auto flex flex-col items-center justify-center text-center py-10 pop-in flex-1">
+      <div id="success-emoji" class="text-8xl mb-4 animate-bounce">🎉</div>
+      <span id="success-kicker" class="text-xs uppercase font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-2">
+        23 пиццы из 23 освоены!
+      </span>
+      <h2 id="success-level-title" class="text-3xl font-black text-slate-800 mb-2">Уровень пройден!</h2>
+      <p id="success-desc" class="text-slate-500 font-semibold mb-6">Ты безошибочно заполнил все пропущенные ингредиенты в меню.</p>
+
+      <div id="success-stat-card" class="w-full mb-8 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 flex flex-col items-center">
+        <span id="success-stat-label" class="text-xs uppercase font-extrabold text-emerald-700 mb-1">Изучено рецептов</span>
+        <span id="success-stat-value" class="text-4xl font-black text-emerald-800">23 / 23</span>
+      </div>
+
+      <div class="flex flex-col gap-2.5 w-full">
+        <button id="btn-next-level" onclick="App.goToNextLevel()" class="btn-duo-green w-full font-black text-lg py-4 rounded-2xl">
+          СЛЕДУЮЩИЙ УРОВЕНЬ
+        </button>
+        <button onclick="App.goToLobby()" class="btn-duo-white w-full font-black text-base py-3.5 rounded-2xl text-slate-700">
+          К СПИСКУ УРОВНЕЙ
+        </button>
+      </div>
+    </section>
+
+    <!-- MODAL: Handbook -->
+    <div id="modal-handbook" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+      <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-2 border-slate-200">
+        <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📖</span>
+            <div>
+              <h3 class="font-extrabold text-lg text-slate-800">Меню пиццы (все 23 позиции)</h3>
+              <p class="text-xs text-slate-500 font-bold">Официальная рецептура</p>
+            </div>
+          </div>
+          <button onclick="App.closeHandbook()" class="text-slate-400 hover:text-slate-600 font-black text-2xl px-2">✕</button>
+        </div>
+
+        <div class="p-4 border-b border-slate-100 bg-white">
+          <input type="text" id="handbook-search" oninput="App.filterHandbook()" placeholder="Поиск пиццы или ингредиента..." class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-emerald-600 text-sm font-semibold">
+        </div>
+
+        <div id="handbook-list" class="overflow-y-auto p-4 space-y-3 flex-1">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="p-3 border-t border-slate-200 bg-slate-50 text-center">
+          <button onclick="App.closeHandbook()" class="btn-duo-green px-8 py-2.5 rounded-xl font-bold text-sm">
+            Вернуться к тренировке
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const App = {
+      state: {
+        completedLevels: [],
+        distractorCount: 10, // 5, 10, 15, 20
+        currentLevelConfig: null,
+        pizzaQueue: [],
+        pizzaIndex: 0,
+        currentPizza: null,
+        hiddenIngredients: [],
+        userPicks: [],
+        poolOptions: [],
+        waitingNext: false,
+        levelCorrect: 0,
+        levelMistakes: 0
+      },
+
+      pluralRu(n, one, few, many) {
+        const abs = Math.abs(n);
+        const n10 = abs % 10;
+        const n100 = abs % 100;
+        if (n10 === 1 && n100 !== 11) return one;
+        if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+        return many;
+      },
+
+      init() {
+        this.loadStorage();
+        this.updateDistractorPillsUI();
+        this.renderLobby();
+        this.renderHandbook();
+      },
+
+      loadStorage() {
+        try {
+          const raw = localStorage.getItem('italingo_save');
+          if (raw) {
+            const data = JSON.parse(raw);
+            this.state.completedLevels = data.completedLevels || [];
+            if ([5, 10, 15, 20].includes(data.distractorCount)) {
+              this.state.distractorCount = data.distractorCount;
+            }
+          }
+        } catch (e) {}
+      },
+
+      saveStorage() {
+        try {
+          const data = {
+            completedLevels: this.state.completedLevels,
+            distractorCount: this.state.distractorCount
+          };
+          localStorage.setItem('italingo_save', JSON.stringify(data));
+        } catch (e) {}
+      },
+
+      toggleSound() {
+        const isMuted = SoundFx.toggleMute();
+        const icon = document.getElementById('sound-icon');
+        const text = document.getElementById('sound-text');
+        if (isMuted) {
+          icon.textContent = '🔇';
+          text.textContent = 'Выкл';
+        } else {
+          icon.textContent = '🔊';
+          text.textContent = 'Звук';
+          SoundFx.playPop();
+        }
+      },
+
+      setDistractorCount(count) {
+        this.state.distractorCount = count;
+        this.saveStorage();
+        this.updateDistractorPillsUI();
+        SoundFx.playPop();
+      },
+
+      updateDistractorPillsUI() {
+        [5, 10, 15, 20].forEach(val => {
+          const pill = document.getElementById(`pill-${val}`);
+          if (pill) {
+            if (this.state.distractorCount === val) {
+              pill.className = 'pill-opt active px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black';
+            } else {
+              pill.className = 'pill-opt px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold';
+            }
+          }
+        });
+      },
+
+      renderLobby() {
+        const container = document.getElementById('levels-container');
+        container.innerHTML = '';
+
+        LEVELS.forEach(lvl => {
+          const isCompleted = this.state.completedLevels.includes(lvl.level);
+
+          const card = document.createElement('div');
+          card.className = `bg-white border-2 ${isCompleted ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'} rounded-3xl p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between`;
+
+          card.innerHTML = `
+            <div>
+              ${isCompleted ? '<div class="flex justify-end mb-3"><span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 flex items-center gap-1">✓ Освоен (23/23)</span></div>' : ''}
+
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-12 h-12 rounded-2xl text-white flex items-center justify-center font-black text-xl shadow-xs" style="background:${lvl.badgeBg}">
+                  ${lvl.level}
+                </div>
+                <div>
+                  <h3 class="text-lg font-black text-slate-800">${lvl.title}</h3>
+                  <p class="text-xs font-extrabold text-slate-500">${lvl.subtitle}</p>
+                </div>
+              </div>
+
+              <p class="text-xs font-semibold text-slate-600 mt-2 mb-4 leading-relaxed">${lvl.desc}</p>
+            </div>
+
+            <button onclick="App.startLevel(${lvl.level})" class="${lvl.btnColor} w-full font-black text-sm py-3 rounded-2xl flex items-center justify-center gap-2">
+              <span>${isCompleted ? 'ПОВТОРИТЬ УРОВЕНЬ' : 'ТРЕНИРОВАТЬСЯ (23 ПИЦЦЫ)'}</span>
+              <span>➔</span>
+            </button>
+          `;
+
+          container.appendChild(card);
+        });
+      },
+
+      startFirstIncompleteLevel() {
+        const next = LEVELS.find(l => !this.state.completedLevels.includes(l.level)) || LEVELS[0];
+        this.startLevel(next.level);
+      },
+
+      goToLobby() {
+        document.getElementById('view-lobby').classList.remove('hidden');
+        document.getElementById('view-game').classList.add('hidden');
+        document.getElementById('view-success').classList.add('hidden');
+        this.renderLobby();
+      },
+
+      startLevel(levelNumber) {
+        const config = LEVELS.find(l => l.level === levelNumber);
+        if (!config) return;
+
+        this.state.currentLevelConfig = config;
+        this.state.pizzaQueue = [...PIZZA_DATABASE].sort(() => 0.5 - Math.random());
+        this.state.pizzaIndex = 0;
+        this.state.waitingNext = false;
+        this.state.levelCorrect = 0;
+        this.state.levelMistakes = 0;
+
+        document.getElementById('view-lobby').classList.add('hidden');
+        document.getElementById('view-success').classList.add('hidden');
+        document.getElementById('view-game').classList.remove('hidden');
+
+        document.getElementById('game-level-badge').textContent = `${config.title} • ${config.subtitle}`;
+
+        this.loadCurrentPizzaQuestion();
+      },
+
+      loadCurrentPizzaQuestion() {
+        const pizza = this.state.pizzaQueue[this.state.pizzaIndex];
+        this.state.currentPizza = pizza;
+        this.state.waitingNext = false;
+        this.state.userPicks = [];
+
+        const currentNum = this.state.pizzaIndex + 1;
+        const totalNum = this.state.pizzaQueue.length;
+        document.getElementById('game-counter').textContent = `${currentNum} / ${totalNum}`;
+        document.getElementById('game-progress-bar').style.width = `${(currentNum / totalNum) * 100}%`;
+
+        const allIngs = [...pizza.ingredients];
+        const countToHide = Math.min(this.state.currentLevelConfig.blanks, allIngs.length);
+
+        const shuffledIndices = allIngs.map((_, i) => i).sort(() => 0.5 - Math.random());
+        const hiddenIndices = new Set(shuffledIndices.slice(0, countToHide));
+
+        this.state.hiddenIngredients = allIngs.filter((_, idx) => hiddenIndices.has(idx));
+        this.state.userPicks = new Array(this.state.hiddenIngredients.length).fill(null);
+
+        // Список известных (открытых) ингредиентов текущей пиццы
+        const knownIngredients = new Set(allIngs.filter((_, idx) => !hiddenIndices.has(idx)));
+
+        // Пул вариантов:
+        const poolSet = new Set(this.state.hiddenIngredients);
+
+        // Набираем РОВНО distractorCount неверных ингредиентов (ловушек)
+        const targetDistractors = this.state.distractorCount;
+        const availableDistractors = ALL_INGREDIENTS
+          .filter(item => !knownIngredients.has(item) && !poolSet.has(item))
+          .sort(() => 0.5 - Math.random());
+
+        for (const distractor of availableDistractors) {
+          if (poolSet.size >= (this.state.hiddenIngredients.length + targetDistractors)) break;
+          poolSet.add(distractor);
+        }
+
+        this.state.poolOptions = Array.from(poolSet).sort(() => 0.5 - Math.random());
+
+        this.renderQuestionUI(hiddenIndices);
+        this.resetFooter();
+      },
+
+      renderQuestionUI(hiddenIndices) {
+        const pizza = this.state.currentPizza;
+        // Всегда единый эмодзи пиццы
+        document.getElementById('pizza-emoji').textContent = '🍕';
+        // Только название пиццы БЕЗ номера
+        document.getElementById('pizza-title').textContent = pizza.name;
+
+        const slotsContainer = document.getElementById('recipe-slots-container');
+        slotsContainer.innerHTML = '';
+
+        let blankCounter = 0;
+        pizza.ingredients.forEach((ing, index) => {
+          const isHidden = hiddenIndices ? hiddenIndices.has(index) : this.state.hiddenIngredients.includes(ing);
+
+          if (!isHidden) {
+            const slot = document.createElement('div');
+            slot.className = 'slot-known font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5';
+            slot.innerHTML = `<span>✓</span><span>${ing}</span>`;
+            slotsContainer.appendChild(slot);
+          } else {
+            const blankIdx = blankCounter;
+            const currentPick = this.state.userPicks[blankIdx];
+            blankCounter++;
+
+            const slot = document.createElement('div');
+            if (currentPick) {
+              slot.className = 'slot-filled font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-2 pop-in';
+              slot.onclick = () => App.removePick(blankIdx);
+              slot.innerHTML = `
+                <span>${currentPick}</span>
+                <span class="text-rose-500 font-black text-xs">✕</span>
+              `;
+            } else {
+              slot.className = 'slot-blank font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5';
+              slot.innerHTML = `
+                <span class="text-amber-500 font-black text-sm">➕</span>
+                <span class="text-amber-900 opacity-75">Выберите ингредиент</span>
+              `;
+            }
+            slotsContainer.appendChild(slot);
+          }
+        });
+
+        const emptySlotsCount = this.state.userPicks.filter(p => p === null).length;
+        document.getElementById('remaining-blanks-text').textContent = emptySlotsCount > 0 
+          ? `Нужно заполнить: ${emptySlotsCount}` 
+          : `Все слоты заполнены!`;
+
+        document.getElementById('pool-title-label').textContent = 'Варианты ингредиентов:';
+
+        const poolContainer = document.getElementById('ingredient-pool');
+        poolContainer.innerHTML = '';
+
+        this.state.poolOptions.forEach(opt => {
+          const isAlreadyPicked = this.state.userPicks.includes(opt);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `ing-card font-bold text-xs sm:text-sm p-3 rounded-2xl text-left flex items-center justify-between ${isAlreadyPicked ? 'picked' : ''}`;
+          btn.onclick = () => App.pickIngredient(opt);
+          btn.innerHTML = `
+            <span class="break-words line-clamp-2">${opt}</span>
+            <span class="text-slate-300 text-xs ml-1 font-black shrink-0">${isAlreadyPicked ? '✓' : '＋'}</span>
+          `;
+          poolContainer.appendChild(btn);
+        });
+
+        const allFilled = !this.state.userPicks.includes(null);
+        const checkBtn = document.getElementById('btn-check-action');
+        checkBtn.disabled = !allFilled && !this.state.waitingNext;
+
+        const resetBtn = document.getElementById('btn-reset-selection');
+        if (this.state.userPicks.some(p => p !== null) && !this.state.waitingNext) {
+          resetBtn.classList.remove('hidden');
+        } else {
+          resetBtn.classList.add('hidden');
+        }
+      },
+
+      pickIngredient(ingredientName) {
+        if (this.state.waitingNext) return;
+
+        const emptyIdx = this.state.userPicks.findIndex(p => p === null);
+        if (emptyIdx === -1) return;
+
+        SoundFx.playPop();
+        this.state.userPicks[emptyIdx] = ingredientName;
+        this.renderQuestionUI();
+      },
+
+      removePick(blankIndex) {
+        if (this.state.waitingNext) return;
+        SoundFx.playRemove();
+        this.state.userPicks[blankIndex] = null;
+        this.renderQuestionUI();
+      },
+
+      resetCurrentSlots() {
+        if (this.state.waitingNext) return;
+        SoundFx.playRemove();
+        this.state.userPicks = new Array(this.state.hiddenIngredients.length).fill(null);
+        this.renderQuestionUI();
+      },
+
+      handleCheckOrNext() {
+        if (this.state.waitingNext) {
+          this.state.pizzaIndex++;
+          if (this.state.pizzaIndex >= this.state.pizzaQueue.length) {
+            this.finishLevel();
+          } else {
+            this.loadCurrentPizzaQuestion();
+          }
+          return;
+        }
+
+        const userSelected = [...this.state.userPicks].sort();
+        const correctTarget = [...this.state.hiddenIngredients].sort();
+
+        let isCorrect = true;
+        for (let i = 0; i < correctTarget.length; i++) {
+          if (userSelected[i] !== correctTarget[i]) {
+            isCorrect = false;
+            break;
+          }
+        }
+
+        this.showFeedback(isCorrect);
+      },
+
+      showFeedback(isCorrect) {
+        this.state.waitingNext = true;
+        if (isCorrect) this.state.levelCorrect++;
+        else this.state.levelMistakes++;
+
+        const footer = document.getElementById('game-footer');
+        const panel = document.getElementById('feedback-panel');
+        const icon = document.getElementById('feedback-icon');
+        const title = document.getElementById('feedback-title');
+        const subtitle = document.getElementById('feedback-subtitle');
+        const checkBtn = document.getElementById('btn-check-action');
+        const resetBtn = document.getElementById('btn-reset-selection');
+
+        panel.classList.remove('hidden');
+        resetBtn.classList.add('hidden');
+        checkBtn.disabled = false;
+        checkBtn.textContent = 'ПРОДОЛЖИТЬ';
+
+        if (isCorrect) {
+          SoundFx.playCorrect();
+          footer.className = 'fixed bottom-0 left-0 right-0 border-t-2 border-emerald-300 bg-emerald-100 p-4 z-40';
+          icon.textContent = '🎉';
+          title.className = 'font-black text-emerald-800 text-lg leading-tight';
+          title.textContent = 'Блестяще! Точный состав!';
+          subtitle.className = 'text-xs sm:text-sm font-bold text-emerald-700';
+          subtitle.textContent = `Пицца «${this.state.currentPizza.name}» собрана верно.`;
+          checkBtn.className = 'btn-duo-green w-full sm:w-auto sm:min-w-[200px] font-black text-base py-3.5 px-6 rounded-2xl';
+        } else {
+          SoundFx.playWrong();
+          const card = document.getElementById('pizza-card-container');
+          card.classList.add('shake-error');
+          setTimeout(() => card.classList.remove('shake-error'), 450);
+
+          footer.className = 'fixed bottom-0 left-0 right-0 border-t-2 border-rose-300 bg-rose-100 p-4 z-40';
+          icon.textContent = '❌';
+          title.className = 'font-black text-rose-800 text-lg leading-tight';
+          title.textContent = 'Ошибка в составе!';
+          subtitle.className = 'text-xs sm:text-sm font-bold text-rose-700';
+          subtitle.textContent = `Правильные ингредиенты: ${this.state.hiddenIngredients.join(', ')}`;
+          checkBtn.className = 'btn-duo-red w-full sm:w-auto sm:min-w-[200px] font-black text-base py-3.5 px-6 rounded-2xl';
+        }
+      },
+
+      resetFooter() {
+        const footer = document.getElementById('game-footer');
+        const panel = document.getElementById('feedback-panel');
+        const checkBtn = document.getElementById('btn-check-action');
+
+        footer.className = 'fixed bottom-0 left-0 right-0 border-t-2 border-slate-200 bg-white p-4 z-40';
+        panel.classList.add('hidden');
+        checkBtn.className = 'btn-duo-green w-full sm:w-auto sm:min-w-[200px] font-black text-base py-3.5 px-6 rounded-2xl';
+        checkBtn.textContent = 'ПРОВЕРИТЬ';
+        checkBtn.disabled = true;
+      },
+
+      finishLevel() {
+        const lvl = this.state.currentLevelConfig;
+        const total = this.state.pizzaQueue.length;
+        const correct = this.state.levelCorrect;
+        const mistakes = this.state.levelMistakes;
+        const perfect = mistakes === 0 && correct === total;
+
+        if (perfect) {
+          SoundFx.playFanfare();
+          if (typeof confetti === 'function') {
+            confetti({
+              particleCount: 100,
+              spread: 80,
+              origin: { y: 0.6 }
+            });
+          }
+          if (!this.state.completedLevels.includes(lvl.level)) {
+            this.state.completedLevels.push(lvl.level);
+          }
+          this.saveStorage();
+        }
+
+        document.getElementById('view-game').classList.add('hidden');
+        document.getElementById('view-success').classList.remove('hidden');
+
+        const emoji = document.getElementById('success-emoji');
+        const kicker = document.getElementById('success-kicker');
+        const statCard = document.getElementById('success-stat-card');
+        const statLabel = document.getElementById('success-stat-label');
+        const statValue = document.getElementById('success-stat-value');
+
+        if (perfect) {
+          emoji.textContent = '🎉';
+          emoji.classList.remove('hidden');
+          kicker.className = 'text-xs uppercase font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full mb-2';
+          kicker.textContent = `${total} пиццы из ${total} освоены!`;
+          document.getElementById('success-level-title').textContent = `${lvl.title} пройден!`;
+          document.getElementById('success-desc').textContent = 'Ты безошибочно заполнил все пропущенные ингредиенты в меню.';
+          statCard.className = 'w-full mb-8 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 flex flex-col items-center';
+          statLabel.className = 'text-xs uppercase font-extrabold text-emerald-700 mb-1';
+          statLabel.textContent = 'Изучено рецептов';
+          statValue.className = 'text-4xl font-black text-emerald-800';
+          statValue.textContent = `${correct} / ${total}`;
+        } else {
+          emoji.classList.add('hidden');
+          kicker.className = 'text-xs uppercase font-extrabold text-rose-700 bg-rose-100 px-3 py-1 rounded-full mb-2';
+          kicker.textContent = `Верно ${correct} из ${total}`;
+          document.getElementById('success-level-title').textContent = `${lvl.title} с ошибками`;
+          document.getElementById('success-desc').textContent =
+            `Допущено ${mistakes} ${this.pluralRu(mistakes, 'ошибка', 'ошибки', 'ошибок')}. Верных ответов — ${correct} из ${total}.`;
+          statCard.className = 'w-full mb-8 bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 flex flex-col items-center';
+          statLabel.className = 'text-xs uppercase font-extrabold text-rose-700 mb-1';
+          statLabel.textContent = 'Верных ответов';
+          statValue.className = 'text-4xl font-black text-rose-800';
+          statValue.textContent = `${correct} / ${total}`;
+        }
+
+        const nextLevelNumber = lvl.level + 1;
+        const nextLvlConfig = LEVELS.find(l => l.level === nextLevelNumber);
+        const nextBtn = document.getElementById('btn-next-level');
+
+        if (nextLvlConfig) {
+          nextBtn.textContent = `ПЕРЕЙТИ: ${nextLvlConfig.title}`;
+          nextBtn.onclick = () => App.startLevel(nextLevelNumber);
+        } else if (perfect) {
+          nextBtn.textContent = `ТЫ ОСВОИЛ ВСЕ УРОВНИ! 🏆`;
+          nextBtn.onclick = () => App.goToLobby();
+        } else {
+          nextBtn.textContent = `ПОВТОРИТЬ ${lvl.title.toUpperCase()}`;
+          nextBtn.onclick = () => App.startLevel(lvl.level);
+        }
+      },
+
+      goToNextLevel() {
+        const current = this.state.currentLevelConfig.level;
+        if (current < LEVELS.length) {
+          this.startLevel(current + 1);
+        } else {
+          this.goToLobby();
+        }
+      },
+
+      confirmExit() {
+        this.goToLobby();
+      },
+
+      openHandbook() {
+        document.getElementById('modal-handbook').classList.remove('hidden');
+        this.filterHandbook();
+      },
+
+      closeHandbook() {
+        document.getElementById('modal-handbook').classList.add('hidden');
+      },
+
+      renderHandbook() {
+        this.filterHandbook();
+      },
+
+      filterHandbook() {
+        const query = (document.getElementById('handbook-search')?.value || '').toLowerCase().trim();
+        const list = document.getElementById('handbook-list');
+        if (!list) return;
+
+        const filtered = PIZZA_DATABASE.filter(item => {
+          const text = `${item.name} ${item.ingredients.join(' ')}`.toLowerCase();
+          return !query || text.includes(query);
+        });
+
+        if (filtered.length === 0) {
+          list.innerHTML = `<div class="text-center py-8 text-slate-400 font-bold">Ничего не найдено</div>`;
+          return;
+        }
+
+        // В справочнике также строго без номеров и только классический эмодзи 🍕
+        list.innerHTML = filtered.map(pizza => `
+          <div class="p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-black text-slate-900 text-sm sm:text-base flex items-center gap-1.5">
+                <span>🍕</span>
+                <span>${pizza.name}</span>
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-black uppercase bg-emerald-100 text-emerald-800">
+                ${pizza.ingredients.length} ингр.
+              </span>
+            </div>
+            <div class="text-xs font-semibold text-slate-600 leading-relaxed">
+              <span class="text-slate-400 font-black">Состав:</span> ${pizza.ingredients.join(', ')}.
+            </div>
+          </div>
+        `).join('');
+      }
+    };
+
+    window.onload = () => {
+      App.init();
+    };
+  </script>
+</body>
+</html>
