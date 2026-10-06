@@ -200,6 +200,37 @@
       animation: popBounce 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
 
+    /* Mode Selector Card */
+    .mode-card {
+      background-color: #ffffff;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 4px 0 #e2e8f0;
+      color: #334155;
+      transition: all 0.12s ease;
+    }
+    .mode-card:hover {
+      border-color: #cbd5e1;
+      background-color: #f8fafc;
+    }
+    .mode-card:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #cbd5e1;
+    }
+    .mode-card.active {
+      background-color: #f0fdf4;
+      border-color: #16a34a;
+      box-shadow: 0 4px 0 #15803d;
+      color: #14532d;
+    }
+
+    /* Active selected card for single-choice mode */
+    .ing-card.selected-choice {
+      background-color: #eff6ff;
+      border-color: #3b82f6;
+      box-shadow: 0 3px 0 #2563eb;
+      color: #1e40af;
+    }
+
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -207,3 +238,4 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
+
